@@ -16,13 +16,16 @@ To install IPMI Sciprt, follow these steps:
 
 ### With Docker installed
 
-Install Majordomo certificate as described in
-https://gitlab.intr/utils/nix-docker-firefox-esr/
-
-Then clone the container and look launch command:
+Build the container with Nix:
 
 ``` shell
-sudo docker pull docker-registry.intr/utils/nix-ipmi:master
+nix-build --no-out-link
+```
+
+Then import the container and look launch command:
+
+``` shell
+sudo docker load /nix/store/….tar.gz
 sudo docker inspect docker-registry.intr/utils/nix-ipmi:master | grep cmd
 ```
 
