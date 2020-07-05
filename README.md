@@ -31,7 +31,12 @@ sudo docker inspect docker-registry.intr/utils/nix-ipmi:master | grep cmd
 
 make sure `xhost` is installed on your system and run the container, e.g.:
 ``` shell
-xhost +local:; docker run --rm --network=host --tty --interactive --user 1000:997 --env DISPLAY=$DISPLAY --volume /etc/localtime:/etc/localtime:ro --volume /tmp/.X11-unix:/tmp/.X11-unix docker-registry.intr/utils/nix-ipmi:master IPMI_PASSWORD jenkins.ipmi
+xhost +local:
+
+docker run --rm --network=host --tty --interactive --user 1000:997                       \
+       --env DISPLAY=$DISPLAY --volume /etc/localtime:/etc/localtime:ro                  \
+       --volume /tmp/.X11-unix:/tmp/.X11-unix docker-registry.intr/utils/nix-ipmi:master \
+       IPMI_PASSWORD jenkins.ipmi
 ```
 NOTE: Replace `IPMI_PASSWORD`.
 
