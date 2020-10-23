@@ -84,6 +84,15 @@ password manager like password-store.
 
 Prefetch jdk-7u75-linux-x64.tar.gz in your Nix Store.
 
+#### nix-shell
+
+``` shell
+nix-shell --pure --run 'ipmi IPMI_PASSWORD web16.ipmi.intr' --show-trace
+
+```
+
+web16.ipmi.intr web25.intr.ipmi web15.ipmi.intr web24.ipmi.intr
+
 ## Using Nix IPMI
 
 To use Nix IPMI just call ipmi with a server name, for example:
@@ -104,6 +113,11 @@ terminal, then in "Security" tab set "Security Level" to "Medium".
 3. Make your changes and commit them: `git commit -m '<commit_message>'`
 4. Push to the original branch: `git push origin <project_name>/<location>`
 5. Create the pull request.
+
+### Tests
+
+Make sure `ipmi` could connect to web16.ipmi.intr web25.intr.ipmi
+web15.ipmi.intr web24.ipmi.intr.
 
 ## Contributors
 

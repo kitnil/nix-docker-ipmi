@@ -16,7 +16,6 @@ let
 
       cat > $out/bin/ipmi <<'EOF'
       #!${bash}/bin/bash
-
       # Generate $HOME/.java/deployment/deployment.properties
       timeout 1 ${ipmi}/bin/ControlPanel
 
@@ -28,7 +27,7 @@ let
       # Create a wrapper
       IPMI_HOST=$2 IPMI_OUTPUT=/tmp/$IPMI_HOST.jviewer.jnlp \
       IPMI_USER=ADMIN IPMI_PASSWORD=$1                      \
-      ${ipmi}/bin/ipmi
+      ${ipmi}/bin/ipmi $1 $2
       EOF
 
       chmod 555 $out/bin/ipmi
@@ -36,7 +35,7 @@ let
     '');
     });
 in pkgs.dockerTools.buildLayeredImage rec {
-  name = "docker-registry.intr/utils/ipmi";
+  name = "docker-registry.intr/utils/nix-ipmi";
   tag = "latest";
   contents = [
     bashInteractive coreutils fontconfig.out shared_mime_info
@@ -68,7 +67,7 @@ in pkgs.dockerTools.buildLayeredImage rec {
     mkdir -p {etc,home/alice,root,tmp}
     chmod 755 etc
     chmod 777 home/alice
-    chmod 777 tmp
+    chmod 1777 tmp
 
     cat > etc/passwd << 'EOF'
     root:!:0:0:System administrator:/root:/bin/sh
