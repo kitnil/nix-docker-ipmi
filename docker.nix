@@ -8,32 +8,6 @@ let
       (p: v: attrsets.nameValuePair (builtins.concatStringsSep sep p) v) set));
   flattenSet = set: flattenSetSep "." set;
   ipmi = callPackage ./default.nix {};
-  entrypoint = (stdenv.mkDerivation {
-    name = "ipmi";
-    builder = writeScript "builder.sh" (''
-      source $stdenv/setup
-      mkdir -p $out/bin
-
-      cat > $out/bin/ipmi <<'EOF'
-      #!${bash}/bin/bash
-      # Generate $HOME/.java/deployment/deployment.properties
-      timeout 1 ${ipmi}/bin/ControlPanel
-
-      # Disable signed self-certificate error
-      cat >> $HOME/.java/deployment/deployment.properties << 'EOFF'
-      deployment.security.level=MEDIUM
-      EOFF
-
-      # Create a wrapper
-      IPMI_HOST=$2 IPMI_OUTPUT=/tmp/$IPMI_HOST.jviewer.jnlp \
-      IPMI_USER=ADMIN IPMI_PASSWORD=$1                      \
-      ${ipmi}/bin/ipmi $1 $2
-      EOF
-
-      chmod 555 $out/bin/ipmi
-      ln -s ${ipmi}/bin/ControlPanel $out/bin/ControlPanel
-    '');
-    });
 in pkgs.dockerTools.buildLayeredImage rec {
   name = "docker-registry.intr/utils/nix-ipmi";
   tag = "latest";
@@ -41,7 +15,7 @@ in pkgs.dockerTools.buildLayeredImage rec {
     bashInteractive coreutils fontconfig.out shared_mime_info
   ];
   config = {
-    Entrypoint = [ "${entrypoint}/bin/ipmi" ];
+    Entrypoint = [ "${ipmi}/bin/ipmi" ];
     Env = [
       "TZ=Europe/Moscow"
       "TZDIR=${tzdata}/share/zoneinfo"
@@ -57,7 +31,7 @@ in pkgs.dockerTools.buildLayeredImage rec {
           "--user" "1000:997" "--env" "DISPLAY=$DISPLAY"
           "--volume" "/etc/localtime:/etc/localtime:ro"
           "--volume" "/tmp/.X11-unix:/tmp/.X11-unix"
-          "${name}:master" "IPMI_PASSWORD" "jenkins.ipmi"
+          "${name}:master" "jenkins.ipmi" "IPMI_PASSWORD"
         ];
     };
   };

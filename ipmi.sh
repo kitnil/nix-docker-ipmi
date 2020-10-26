@@ -3,11 +3,17 @@
 export PATH="@curl@/bin:@coreutils@/bin:@gawk@/bin:@gnused@/bin:@gnugrep@/bin:@ipmitool@/bin:/run/wrappers/bin:$PATH"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
-IPMI_HOST=$2
+IPMI_HOST=$1
 IPMI_OUTPUT=/tmp/"$IPMI_HOST".jviewer.jnlp
 IPMI_USER=ADMIN
-IPMI_PASSWORD=$1
+IPMI_PASSWORD=${2:-$IPMI_PASSWORD}
 IPMI_VERSION="$(ipmitool -H "$IPMI_HOST"  -U "$IPMI_USER" -P "$IPMI_PASSWORD" mc info | awk '/Firmware Revision/ {print $NF}')"
+IPMI_OUTPUT_CLEAN=${IPMI_OUTPUT_CLEAN:-1}
+
+help_main()
+{
+    echo "Usage: ipmi jenkins.ipmi.intr IPMI_PASSWORD"
+}
 
 [[ "$VNCDESKTOP" ]] \
     || export _JAVA_OPTIONS='-Dsun.java2d.opengl=true -Ddeployment.security.level=MEDIUM -Djava.util.prefs.systemRoot=/tmp/.java -Djava.util.prefs.userRoot=/tmp/.java/.userPrefs -Ddeployment.system.config=/tmp/.java/deployment.properties -Ddeployment.system.config.mandatory=true'
@@ -93,44 +99,51 @@ three()
         && LC_ALL=C @mjAdoptopenjdkIcedteaWeb8Javaws@/bin/mj-adoptopenjdk-icedtea-web8-hfs "$IPMI_OUTPUT"
 }
 
-case "$IPMI_VERSION" in
-
-    3.71|3.70|3.74|2.50|3.15)
-        echo  "------------------------------------------------------------------------------------"
-        echo  "--------------  detected firmware $IPMI_VERSION launch case for 3.71 ------------------------"
-        echo  "------------------------------------------------------------------------------------"
-        two
+case "$1" in
+    *.intr|*.ipmi)
+        case "$IPMI_VERSION" in
+            3.71|3.70|3.74|2.50|3.15)
+                echo  "------------------------------------------------------------------------------------"
+                echo  "--------------  detected firmware $IPMI_VERSION launch case for 3.71 ------------------------"
+                echo  "------------------------------------------------------------------------------------"
+                two
+                ;;
+            2.77)
+                echo  "------------------------------------------------------------------------------------"
+                echo  "-------------- detected firmware $IPMI_VERSION launch case for 2.77 -------------------------"
+                echo  "------------------------------------------------------------------------------------"
+                three
+                ;;
+            1.33|2.04|1.17|1.31|2.06|1.35|1.07)
+                echo  "------------------------------------------------------------------------------------"
+                echo  "-------------- detected firmware $IPMI_VERSION launch case for 1.33 -------------------------"
+                echo  "------------------------------------------------------------------------------------"
+                one
+                ;;
+            *)
+                echo  "------------------------------------------------------------------------------------"
+                echo  "-------------- unknown firmware method for $IPMI_VERSION version ----------------------------"
+                echo  "------------------------------------------------------------------------------------"
+                echo  "-------------- use method one ---------------------------------------------------------------"
+                one
+                echo  "------------------------------------------------------------------------------------"
+                sleep 10
+                echo "--------------- use method two ---------------------------------------------------------------"
+                two
+                echo  "------------------------------------------------------------------------------------"
+                sleep 10
+                echo "--------------- use method three -------------------------------------------------------------"
+                three
+                echo  "------------------------------------------------------------------------------------"
+                ;;
+        esac
+        [ "$IPMI_OUTPUT_CLEAN" -eq 1 ] && (
+            echo "Deleting: $IPMI_OUTPUT"
+            rm --force "$IPMI_OUTPUT"
+        )
         ;;
-
-    2.77)
-        echo  "------------------------------------------------------------------------------------"
-        echo  "-------------- detected firmware $IPMI_VERSION launch case for 2.77 -------------------------"
-        echo  "------------------------------------------------------------------------------------"
-        three
-        ;;
-
-    1.33|2.04|1.17|1.31|2.06|1.35|1.07)
-        echo  "------------------------------------------------------------------------------------"
-        echo  "-------------- detected firmware $IPMI_VERSION launch case for 1.33 -------------------------"
-        echo  "------------------------------------------------------------------------------------"
-        one
-        ;;
-
-
-    *)
-        echo  "------------------------------------------------------------------------------------"
-        echo  "-------------- unknown firmware method for $IPMI_VERSION version ----------------------------"
-        echo  "------------------------------------------------------------------------------------"
-        echo  "-------------- use method one ---------------------------------------------------------------"
-        one
-        echo  "------------------------------------------------------------------------------------"
-        sleep 10
-        echo "--------------- use method two ---------------------------------------------------------------"
-        two
-        echo  "------------------------------------------------------------------------------------"
-        sleep 10
-        echo "--------------- use method three -------------------------------------------------------------"
-        three
-        echo  "------------------------------------------------------------------------------------"
+    --help|-h|*)
+        help_main
+        exit 0
         ;;
 esac
