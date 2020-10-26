@@ -1,13 +1,13 @@
 #!/bin/bash
 
-export PATH="@curl@/bin:@coreutils@/bin:@gawk@/bin:@gnused@/bin:@gnugrep@/bin:@ipmitool@/bin:/run/wrappers/bin:$PATH"
+export PATH="@curl@/bin:@coreutils@/bin:@gawk@/bin:@gnused@/bin:@gnugrep@/bin:@ipmitool@/bin:@inetutils@/bin:/run/wrappers/bin:$PATH"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
 IPMI_HOST=$1
 IPMI_OUTPUT=/tmp/"$IPMI_HOST".jviewer.jnlp
 IPMI_USER=ADMIN
 IPMI_PASSWORD=${2:-$IPMI_PASSWORD}
-IPMI_VERSION="$(ipmitool -H "$IPMI_HOST"  -U "$IPMI_USER" -P "$IPMI_PASSWORD" mc info | awk '/Firmware Revision/ {print $NF}')"
+IPMI_VERSION="$(set -x; ipmitool -H "$IPMI_HOST"  -U "$IPMI_USER" -P "$IPMI_PASSWORD" mc info | awk '/Firmware Revision/ {print $NF}')"
 IPMI_OUTPUT_CLEAN=${IPMI_OUTPUT_CLEAN:-1}
 
 help_main()
@@ -31,23 +31,24 @@ cookie()
 {
     curl --insecure --silent \
          --data "WEBVAR_USERNAME=$IPMI_USER&WEBVAR_PASSWORD=$IPMI_PASSWORD" \
-         http://"$IPMI_HOST"/rpc/WEBSES/create.asp \
+         https://"$IPMI_HOST"/rpc/WEBSES/create.asp \
         | grep SESSION_COOKIE \
         | cut -d\' -f 4
 }
 
 download ()
 {
+    grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && rm -f "$IPMI_OUTPUT"
     if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
     then
         COOKIE="$(cookie)"
-        echo -e "COOKIE is $COOKIE\nIPMI_HOST is $IPMI_HOST\nIPMI_USER is $IPMI_USER\nIPMI_PASSWORD is $IPMI_PASSWORD\n"
         [[ -z "$COOKIE" ]] \
             || curl --insecure --silent \
                     --cookie Cookie=SessionCookie="$COOKIE" \
-                    http://"$IPMI_HOST"/Java/jviewer.jnlp \
+                    https://"$IPMI_HOST"/Java/jviewer.jnlp \
                     --output "$IPMI_OUTPUT"
     fi
+    grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && rm -f "$IPMI_OUTPUT"
     if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
     then
         COOKIE="$(cookie)"
@@ -56,15 +57,24 @@ download ()
                     --cookie Cookie=SessionCookie="$COOKIE" \
                     --output "$IPMI_OUTPUT" \
                     "https://$IPMI_HOST/Java/jviewer.jnlp?EXTRNIP=$IPMI_HOST&JNLPSTR=JViewer"
-        echo -e "COOKIE is $COOKIE\nIPMI_HOST is $IPMI_HOST\nIPMI_USER is $IPMI_USER\nIPMI_PASSWORD is $IPMI_PASSWORD\n"
     fi
+    grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && rm -f "$IPMI_OUTPUT"
     if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
     then
-        echo -e "COOKIE is $COOKIE\nIPMI_HOST is $IPMI_HOST\nIPMI_USER is $IPMI_USER\nIPMI_PASSWORD is $IPMI_PASSWORD\n"
         COOKIE="$(curl -d "name=$IPMI_USER&pwd=$IPMI_PASSWORD" "https://$IPMI_HOST/cgi/login.cgi" --silent --insecure -i | awk '/Set-Cookie.*path/ && NR != 2 { print $2 }' | sed -e 's:;::g')"
         [[ -z "$COOKIE" ]] \
             || curl --silent --insecure --cookie Cookie="$COOKIE" --output "$IPMI_OUTPUT" "https://$IPMI_HOST/cgi/url_redirect.cgi?url_name=ikvm&url_type=jwsk"
     fi
+    grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && rm -f "$IPMI_OUTPUT"
+    if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
+    then
+        COOKIE=$(curl -d "name=$IPMI_USER&pwd=$IPMI_PASSWORD" "https://$IPMI_HOST/cgi/login.cgi" --silent --insecure -i | awk '/Set-Cookie.*path/ && NR != 2 { print $2 }' | sed -e 's:;::g' -e 's:SID=::g')
+        [[ -z "$COOKIE" ]] \
+            || curl --silent --insecure --cookie Cookie=SID="$COOKIE" "https://$IPMI_HOST/cgi/Build_jnlp.cgi"
+               curl --silent --insecure --cookie Cookie=SID="$COOKIE" "https://$IPMI_HOST/jnlp/sess_$COOKIE.jnlp" --output "$IPMI_OUTPUT"
+   fi
+        echo -e "COOKIE is $COOKIE\nIPMI_HOST is $IPMI_HOST\nIPMI_USER is $IPMI_USER\nIPMI_PASSWORD is $IPMI_PASSWORD\n"
+        grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && echo "ipmi_session is expired or 404" && rm -f "$IPMI_OUTPUT" && exit 1
 }
 
 one()
@@ -102,7 +112,7 @@ three()
 case "$1" in
     *.intr|*.ipmi)
         case "$IPMI_VERSION" in
-            3.71|3.70|3.74|2.50|3.15)
+            3.71|3.70|3.74|2.50|3.15|1.58)
                 echo  "------------------------------------------------------------------------------------"
                 echo  "--------------  detected firmware $IPMI_VERSION launch case for 3.71 ------------------------"
                 echo  "------------------------------------------------------------------------------------"
@@ -114,7 +124,7 @@ case "$1" in
                 echo  "------------------------------------------------------------------------------------"
                 three
                 ;;
-            1.33|2.04|1.17|1.31|2.06|1.35|1.07)
+            1.33|2.04|1.17|1.31|2.06|1.35|1.07|1.32|2.02|1.05|2.08|2.01|3.27|2.60)
                 echo  "------------------------------------------------------------------------------------"
                 echo  "-------------- detected firmware $IPMI_VERSION launch case for 1.33 -------------------------"
                 echo  "------------------------------------------------------------------------------------"
@@ -124,15 +134,15 @@ case "$1" in
                 echo  "------------------------------------------------------------------------------------"
                 echo  "-------------- unknown firmware method for $IPMI_VERSION version ----------------------------"
                 echo  "------------------------------------------------------------------------------------"
-                echo  "-------------- use method one ---------------------------------------------------------------"
+                echo  "-------------- try method one for $IPMI_VERSION  ---------------------------------------------------------------"
                 one
                 echo  "------------------------------------------------------------------------------------"
                 sleep 10
-                echo "--------------- use method two ---------------------------------------------------------------"
+                echo "--------------- try method two for $IPMI_VERSION ---------------------------------------------------------------"
                 two
                 echo  "------------------------------------------------------------------------------------"
                 sleep 10
-                echo "--------------- use method three -------------------------------------------------------------"
+                echo "--------------- try method three for $IPMI_VERSION -------------------------------------------------------------"
                 three
                 echo  "------------------------------------------------------------------------------------"
                 ;;
