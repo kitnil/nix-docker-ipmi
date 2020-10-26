@@ -1,6 +1,7 @@
 { stdenv, commit ? "86062d7a952c9e8cdb0b370cedf1b010e0864bb4", bash
 , glibcLocales, coreutils, curl, gnugrep, gnused, gawk, adoptopenjdk-icedtea-web
-, shellcheck, writeScript, buildFHSUserEnv, ipmitool, iputils }:
+, shellcheck, writeScript, buildFHSUserEnv, ipmitool, iputils, installShellFiles
+}:
 
 let
   mj-adoptopenjdk-icedtea-web7 = (import (builtins.fetchTarball {
@@ -17,6 +18,7 @@ in stdenv.mkDerivation rec {
   version = "1.0.0";
   src = ./.;
   doCheck = true;
+  nativeBuildInputs = [ installShellFiles ];
   checkInputs = [ shellcheck ];
   checkPhase = ''
     shellcheck ipmi.sh
@@ -38,5 +40,6 @@ in stdenv.mkDerivation rec {
   '';
   installPhase = ''
     install -Dm555 ./ipmi.sh $out/bin/ipmi
+    installShellCompletion --bash --name ipmi ${src}/etc/completion/bash/ipmi
   '';
 }
