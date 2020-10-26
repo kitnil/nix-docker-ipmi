@@ -30,7 +30,8 @@ cookie()
         | cut -d\' -f 4
 }
 
-download () {
+download ()
+{
     if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
     then
         COOKIE="$(cookie)"
