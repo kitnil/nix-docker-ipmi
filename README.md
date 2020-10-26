@@ -36,7 +36,7 @@ xhost +local:
 docker run --rm --network=host --tty --interactive --user 1000:997                       \
        --env DISPLAY=$DISPLAY --volume /etc/localtime:/etc/localtime:ro                  \
        --volume /tmp/.X11-unix:/tmp/.X11-unix docker-registry.intr/utils/nix-ipmi:master \
-       IPMI_PASSWORD jenkins.ipmi
+       jenkins.ipmi IPMI_PASSWORD
 ```
 NOTE: Replace `IPMI_PASSWORD`.
 
@@ -87,7 +87,7 @@ Prefetch jdk-7u75-linux-x64.tar.gz in your Nix Store.
 #### nix-shell
 
 ``` shell
-nix-shell --pure --run 'ipmi IPMI_PASSWORD web16.ipmi.intr' --show-trace
+nix-shell --pure --run 'ipmi web16.ipmi.intr IPMI_PASSWORD' --show-trace
 
 ```
 
