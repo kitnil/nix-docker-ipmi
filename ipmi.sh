@@ -63,7 +63,7 @@ download ()
     then
         COOKIE="$(curl -d "name=$IPMI_USER&pwd=$IPMI_PASSWORD" "https://$IPMI_HOST/cgi/login.cgi" --silent --insecure -i | awk '/Set-Cookie.*path/ && NR != 2 { print $2 }' | sed -e 's:;::g')"
         [[ -z "$COOKIE" ]] \
-            || curl --silent --insecure --cookie Cookie="$COOKIE" --output "$IPMI_OUTPUT" "https://$IPMI_HOST/cgi/url_redirect.cgi?url_name=ikvm&url_type=jwsk"
+            || curl --silent --insecure --cookie Cookie="$COOKIE" -H "Referer: http://$IPMI_HOST/cgi/url_redirect.cgi?url_name=sys_info" --output "$IPMI_OUTPUT" "https://$IPMI_HOST/cgi/url_redirect.cgi?url_name=ikvm&url_type=jwsk"
     fi
     grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && rm -f "$IPMI_OUTPUT"
     if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
@@ -124,7 +124,7 @@ case "$1" in
                 echo  "------------------------------------------------------------------------------------"
                 three
                 ;;
-            1.33|2.04|1.17|1.31|2.06|1.35|1.07|1.32|2.02|1.05|2.08|2.01|3.27|2.60|1.15)
+            1.33|2.04|1.17|1.31|2.06|1.35|1.07|1.32|2.02|1.05|2.08|2.01|3.27|2.60|1.15|3.16)
                 echo  "------------------------------------------------------------------------------------"
                 echo  "-------------- detected firmware $IPMI_VERSION launch case for 1.33 -------------------------"
                 echo  "------------------------------------------------------------------------------------"

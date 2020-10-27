@@ -38,10 +38,10 @@ dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print $1}' | sort -u'
 + mj427.ipmi.intr.
 + mj711.ipmi.intr.
 + mj735.ipmi.intr.
-- mj742.ipmi.intr.
-- mj744.ipmi.intr.
-- mj751.ipmi.intr.
-- mj753.ipmi.intr.
++ mj742.ipmi.intr.
++ mj744.ipmi.intr.
++ mj751.ipmi.intr.
++ mj753.ipmi.intr.
 + mj754.ipmi.intr.
 + mj757.ipmi.intr.
 + mj762.ipmi.intr.
@@ -59,13 +59,13 @@ dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print $1}' | sort -u'
 + mj811.ipmi.intr.
 + nginx2.ipmi.intr.
 + ns1-mr.ipmi.intr.
-- ns2-mr.ipmi.intr.
++ ns2-mr.ipmi.intr. # Keyborad not working
 + pop1.ipmi.intr.
 - pop2.ipmi.intr. # No ping
 + staff.ipmi.intr.
 + web15.ipmi.intr.
 + web16.ipmi.intr.
-- web17.ipmi.intr. # No session slot available
++ web17.ipmi.intr. # No session slot available
 - web18.ipmi.intr. # Need full power cycle
 + web20.ipmi.intr.
 + web21.ipmi.intr.
@@ -82,7 +82,7 @@ dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print $1}' | sort -u'
 + web33.ipmi.intr.
 + web35.ipmi.intr.
 + web37.ipmi.intr.
-- webmail1.ipmi.intr. # - 404
-- webmail2.ipmi.intr. # - 404
++ webmail1.ipmi.intr. # Keyborad not working
++ webmail2.ipmi.intr. # Keyborad not working
 + zabbix.ipmi.intr.
 ```
