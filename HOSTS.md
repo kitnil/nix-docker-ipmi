@@ -34,7 +34,7 @@ dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print $1}' | sort -u'
 + kvm35.ipmi.intr.
 + kvm36.ipmi.intr. is web24
 + kvm38.ipmi.intr. is web32
-- kvm9.ipmi.intr. #Activate Session error: No session slot available
++ kvm9.ipmi.intr.
 + mj427.ipmi.intr.
 + mj711.ipmi.intr.
 + mj735.ipmi.intr.
