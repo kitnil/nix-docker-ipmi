@@ -59,7 +59,7 @@ dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print $1}' | sort -u'
 + mj811.ipmi.intr.
 + nginx2.ipmi.intr.
 + ns1-mr.ipmi.intr.
-+ ns2-mr.ipmi.intr. # Keyborad not working
++ ns2-mr.ipmi.intr.
 + pop1.ipmi.intr.
 - pop2.ipmi.intr. # No ping
 + staff.ipmi.intr.
@@ -82,7 +82,7 @@ dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print $1}' | sort -u'
 + web33.ipmi.intr.
 + web35.ipmi.intr.
 + web37.ipmi.intr.
-+ webmail1.ipmi.intr. # Keyborad not working
-+ webmail2.ipmi.intr. # Keyborad not working
++ webmail1.ipmi.intr.
++ webmail2.ipmi.intr.
 + zabbix.ipmi.intr.
 ```
