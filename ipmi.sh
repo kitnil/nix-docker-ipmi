@@ -14,7 +14,11 @@ IPMI_HOST=$1
 IPMI_OUTPUT=/tmp/"$IPMI_HOST".jviewer.jnlp
 IPMI_USER=ADMIN
 IPMI_PASSWORD=${2:-$IPMI_PASSWORD}
-[ $inside_container -eq 0 ] && ping -c 1 "$IPMI_HOST" || exit 1
+
+if [ $inside_container -eq 0 ]
+then
+    ping -c 1 "$IPMI_HOST" || exit 1
+fi
 IPMI_VERSION="$(set -x; ipmitool -H "$IPMI_HOST"  -U "$IPMI_USER" -P "$IPMI_PASSWORD" mc info | awk '/Firmware Revision/ {print $NF}')"
 IPMI_OUTPUT_CLEAN=${IPMI_OUTPUT_CLEAN:-1}
 XDOTOOL=${XDOTOOL:-0}
@@ -83,10 +87,20 @@ one()
 {
     download
     LANG=@glibcLocales@/lib/locale/locale-archive
-    grep "$IPMI_HOST" "$IPMI_OUTPUT" && \
-        LC_ALL=C @mjAdoptopenjdkIcedteaWeb7@/bin/javaws -Xnosplash -wait -verbose "$IPMI_OUTPUT" &
-     [ "$XDOTOOL" -eq 1 ] && sleep 3 && xdotool key Tab ; xdotool key Tab ;  xdotool key space ;
-    sleep 3
+    if grep "$IPMI_HOST" "$IPMI_OUTPUT"
+    then
+        if [ "$XDOTOOL" -eq 1 ]
+        then
+            LC_ALL=C @mjAdoptopenjdkIcedteaWeb7@/bin/javaws -Xnosplash -wait -verbose "$IPMI_OUTPUT" &
+            sleep 3
+            xdotool key Tab
+            xdotool key Tab
+            xdotool key space
+            sleep 3
+        else
+            LC_ALL=C @mjAdoptopenjdkIcedteaWeb7@/bin/javaws -Xnosplash -wait -verbose "$IPMI_OUTPUT"
+        fi
+    fi
 }
 
 two()
