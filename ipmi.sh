@@ -14,7 +14,7 @@ IPMI_HOST=$1
 IPMI_OUTPUT=/tmp/"$IPMI_HOST".jviewer.jnlp
 IPMI_USER=ADMIN
 IPMI_PASSWORD=${2:-$IPMI_PASSWORD}
-[ $inside_container -eq 0 ] && ping -c 3 "$IPMI_HOST" || exit 1
+[ $inside_container -eq 0 ] && ping -c 1 "$IPMI_HOST" || exit 1
 IPMI_VERSION="$(set -x; ipmitool -H "$IPMI_HOST"  -U "$IPMI_USER" -P "$IPMI_PASSWORD" mc info | awk '/Firmware Revision/ {print $NF}')"
 IPMI_OUTPUT_CLEAN=${IPMI_OUTPUT_CLEAN:-1}
 XDOTOOL=${XDOTOOL:-0}
