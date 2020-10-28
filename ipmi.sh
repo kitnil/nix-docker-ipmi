@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH="@curl@/bin:@coreutils@/bin:@gawk@/bin:@gnused@/bin:@gnugrep@/bin:@ipmitool@/bin:@iputils@/bin:@inetutils@/bin:@xdotool@/bin:/run/wrappers/bin:$PATH"
+export PATH="@curl@/bin:@coreutils@/bin:@gawk@/bin:@gnused@/bin:@gnugrep@/bin:/run/setuid-programs:@ipmitool@/bin:@iputils@/bin:@inetutils@/bin:@xdotool@/bin:/run/wrappers/bin:$PATH"
 export _JAVA_AWT_WM_NONREPARENTING=1
 
 if grep 'docker\|lxc' /proc/1/cgroup
