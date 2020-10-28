@@ -1,14 +1,23 @@
 #!/bin/bash
 
-export PATH="@curl@/bin:@coreutils@/bin:@gawk@/bin:@gnused@/bin:@gnugrep@/bin:@ipmitool@/bin:@inetutils@/bin:/run/wrappers/bin:$PATH"
+export PATH="@curl@/bin:@coreutils@/bin:@gawk@/bin:@gnused@/bin:@gnugrep@/bin:@ipmitool@/bin:@iputils@/bin:@inetutils@/bin:@xdotool@/bin:/run/wrappers/bin:$PATH"
 export _JAVA_AWT_WM_NONREPARENTING=1
+
+if grep 'docker\|lxc' /proc/1/cgroup
+then
+    inside_container=1
+else
+    inside_container=0
+fi
 
 IPMI_HOST=$1
 IPMI_OUTPUT=/tmp/"$IPMI_HOST".jviewer.jnlp
 IPMI_USER=ADMIN
 IPMI_PASSWORD=${2:-$IPMI_PASSWORD}
+[ $inside_container -eq 0 ] && ping -c 3 "$IPMI_HOST" || exit 1
 IPMI_VERSION="$(set -x; ipmitool -H "$IPMI_HOST"  -U "$IPMI_USER" -P "$IPMI_PASSWORD" mc info | awk '/Firmware Revision/ {print $NF}')"
 IPMI_OUTPUT_CLEAN=${IPMI_OUTPUT_CLEAN:-1}
+XDOTOOL=${XDOTOOL:-0}
 
 help_main()
 {
@@ -17,13 +26,6 @@ help_main()
 
 [[ "$VNCDESKTOP" ]] \
     || export _JAVA_OPTIONS='-Dsun.java2d.opengl=true -Ddeployment.security.level=MEDIUM -Djava.util.prefs.systemRoot=/tmp/.java -Djava.util.prefs.userRoot=/tmp/.java/.userPrefs -Ddeployment.system.config=/tmp/.java/deployment.properties -Ddeployment.system.config.mandatory=true'
-
-if grep 'docker\|lxc' /proc/1/cgroup
-then
-    inside_container=1
-else
-    inside_container=0
-fi
 
 [ $inside_container -eq 1 ] && unset _JAVA_OPTIONS
 
@@ -82,8 +84,9 @@ one()
     download
     LANG=@glibcLocales@/lib/locale/locale-archive
     grep "$IPMI_HOST" "$IPMI_OUTPUT" && \
-        LC_ALL=C @mjAdoptopenjdkIcedteaWeb7@/bin/javaws -Xnosplash -wait -verbose "$IPMI_OUTPUT"
-    sleep 5
+        LC_ALL=C @mjAdoptopenjdkIcedteaWeb7@/bin/javaws -Xnosplash -wait -verbose "$IPMI_OUTPUT" &
+     [ "$XDOTOOL" -eq 1 ] && sleep 3 && xdotool key Tab ; xdotool key Tab ;  xdotool key space ;
+    sleep 3
 }
 
 two()

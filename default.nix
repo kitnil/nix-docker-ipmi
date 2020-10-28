@@ -1,7 +1,7 @@
 { stdenv, commit ? "86062d7a952c9e8cdb0b370cedf1b010e0864bb4", bash
 , glibcLocales, coreutils, curl, gnugrep, gnused, gawk, adoptopenjdk-icedtea-web
 , shellcheck, writeScript, buildFHSUserEnv, ipmitool, iputils, installShellFiles
-, inetutils
+, inetutils, xdotool
 }:
 
 let
@@ -33,10 +33,12 @@ in stdenv.mkDerivation rec {
     export gnugrep=${gnugrep}
     export ipmitool=${ipmitool}
     export inetutils=${inetutils}
+    export iputils=${iputils}
     export adoptopenjdkIcedteaWeb=${adoptopenjdk-icedtea-web}
     export mjAdoptopenjdkIcedteaWeb7=${mj-adoptopenjdk-icedtea-web7}
     export mjAdoptopenjdkIcedteaWeb8Javaws=${mj-adoptopenjdk-icedtea-web8-javaws}
     export glibcLocales=${glibcLocales}
+    export xdotool=${xdotool}
     substituteAllInPlace ipmi.sh
     patchShebangs ipmi.sh
   '';
