@@ -1,2 +1,2 @@
-complete -W "$(dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print substr($1,1,length($1)-1)}' | sort -u)" ipmi
-complete -W "$(dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print substr($1,1,length($1)-1)}' | sort -u)" ipmi
+complete -W "$(timeout 1 dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print substr($1,1,length($1)-1)}' | sort -u)" ipmi
+complete -W "$(timeout 1 dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print substr($1,1,length($1)-1)}' | sort -u)" ipmi
