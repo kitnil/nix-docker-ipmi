@@ -1,7 +1,7 @@
 { stdenv, commit ? "86062d7a952c9e8cdb0b370cedf1b010e0864bb4", bash
 , glibcLocales, coreutils, curl, gnugrep, gnused, gawk, adoptopenjdk-icedtea-web
 , shellcheck, writeScript, buildFHSUserEnv, ipmitool, iputils, installShellFiles
-, inetutils, xdotool
+, inetutils, xdotool, dnsutils
 }:
 
 let
@@ -43,7 +43,13 @@ in stdenv.mkDerivation rec {
     patchShebangs ipmi.sh
   '';
   installPhase = ''
+    # Script
     install -Dm555 ./ipmi.sh $out/bin/ipmi
-    installShellCompletion --bash --name ipmi ${src}/etc/completion/bash/ipmi
+    # Shell completion
+    export coreutils=${coreutils}
+    export gawk=${gawk}
+    export dnsutils=${dnsutils}
+    substituteAllInPlace etc/completion/bash/ipmi
+    installShellCompletion --bash --name ipmi etc/completion/bash/ipmi
   '';
 }

@@ -1,1 +1,3 @@
+PATH=@coreutils@/bin:@dnsutils@/bin:@gawk@/bin:$PATH
+export PATH
 complete -W "$(timeout 1 dig @172.16.103.2 -tAXFR intr | awk '/ipmi/ {print substr($1,1,length($1)-1)}' | sort -u)" ipmi
