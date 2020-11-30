@@ -106,6 +106,14 @@ terminal, then in "Security" tab set "Security Level" to "Medium".
 
 > Your security settings have blocked a self-signed application from running
 
+## Troubleshooting
+
+If no IPMI sessions available, you could make a cold reset with:
+``` shell
+[root@web35:~]# ipmitool mc reset cold
+```
+then try to reconnect with ipmi utility.
+
 ## Contributing to Nix IPMI
 
 1. Fork this repository.
