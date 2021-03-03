@@ -1,11 +1,17 @@
-with import <nixpkgs> {};
+# SPDX-FileCopyrightText: 2020 Serokell <https://serokell.io/>
+#
+# SPDX-License-Identifier: MPL-2.0
 
-let
-  ipmi = (callPackage ./default.nix { });
-in stdenv.mkDerivation {
-  name = "ipmishell";
-  buildInputs = [ ipmi ];
-  shellHook = ''
-    source ${ipmi}/share/bash-completion/completions/ipmi
-  '';
-}
+(import
+  (
+    let
+      lock = builtins.fromJSON (builtins.readFile ./flake.lock);
+    in
+    fetchTarball {
+      url = "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
+      sha256 = lock.nodes.flake-compat.locked.narHash;
+    }
+  )
+  {
+    src = ./.;
+  }).shellNix
