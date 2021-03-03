@@ -49,11 +49,13 @@ printf "JAVA_OPTIONS: %s\n" "$_JAVA_OPTIONS"
 
 cookie()
 {
-    curl --insecure --silent \
+    curl --insecure \
+         --silent \
+         --max-time 5 \
          --data "WEBVAR_USERNAME=$IPMI_USER&WEBVAR_PASSWORD=$IPMI_PASSWORD" \
          https://"$IPMI_HOST"/rpc/WEBSES/create.asp \
         | grep SESSION_COOKIE \
-        | cut -d\' -f 4
+        | cut -d \' -f 4
 }
 
 download ()
@@ -64,6 +66,7 @@ download ()
         COOKIE="$(cookie)"
         [[ -z "$COOKIE" ]] \
             || curl --insecure --silent \
+                    --max-time 5 \
                     --cookie Cookie=SessionCookie="$COOKIE" \
                     https://"$IPMI_HOST"/Java/jviewer.jnlp \
                     --output "$IPMI_OUTPUT"
@@ -73,7 +76,9 @@ download ()
     then
         COOKIE="$(cookie)"
         [[ -z "$COOKIE" ]] \
-            || curl --insecure --silent\
+            || curl --insecure \
+                    --silent \
+                    --max-time 5 \
                     --cookie Cookie=SessionCookie="$COOKIE" \
                     --output "$IPMI_OUTPUT" \
                     "https://$IPMI_HOST/Java/jviewer.jnlp?EXTRNIP=$IPMI_HOST&JNLPSTR=JViewer"
@@ -81,17 +86,17 @@ download ()
     grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && rm -f "$IPMI_OUTPUT"
     if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
     then
-        COOKIE="$(curl -d "name=$IPMI_USER&pwd=$IPMI_PASSWORD" "https://$IPMI_HOST/cgi/login.cgi" --silent --insecure -i | awk '/Set-Cookie.*path/ && NR != 2 { print $2 }' | sed -e 's:;::g')"
+        COOKIE="$(curl -d "name=$IPMI_USER&pwd=$IPMI_PASSWORD" "https://$IPMI_HOST/cgi/login.cgi" --max-time 5 --silent --insecure -i | awk '/Set-Cookie.*path/ && NR != 2 { print $2 }' | sed -e 's:;::g')"
         [[ -z "$COOKIE" ]] \
-            || curl --silent --insecure --cookie Cookie="$COOKIE" -H "Referer: http://$IPMI_HOST/cgi/url_redirect.cgi?url_name=sys_info" --output "$IPMI_OUTPUT" "https://$IPMI_HOST/cgi/url_redirect.cgi?url_name=ikvm&url_type=jwsk"
+            || curl --max-time 5 --silent --insecure --cookie Cookie="$COOKIE" -H "Referer: http://$IPMI_HOST/cgi/url_redirect.cgi?url_name=sys_info" --output "$IPMI_OUTPUT" "https://$IPMI_HOST/cgi/url_redirect.cgi?url_name=ikvm&url_type=jwsk"
     fi
     grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && rm -f "$IPMI_OUTPUT"
     if ! grep "$IPMI_HOST" "$IPMI_OUTPUT"
     then
-        COOKIE=$(curl -d "name=$IPMI_USER&pwd=$IPMI_PASSWORD" "https://$IPMI_HOST/cgi/login.cgi" --silent --insecure -i | awk '/Set-Cookie.*path/ && NR != 2 { print $2 }' | sed -e 's:;::g' -e 's:SID=::g')
+        COOKIE=$(curl -d "name=$IPMI_USER&pwd=$IPMI_PASSWORD" "https://$IPMI_HOST/cgi/login.cgi" --max-time 5 --silent --insecure -i | awk '/Set-Cookie.*path/ && NR != 2 { print $2 }' | sed -e 's:;::g' -e 's:SID=::g')
         [[ -z "$COOKIE" ]] \
-            || curl --silent --insecure --cookie Cookie=SID="$COOKIE" "https://$IPMI_HOST/cgi/Build_jnlp.cgi"
-               curl --silent --insecure --cookie Cookie=SID="$COOKIE" "https://$IPMI_HOST/jnlp/sess_$COOKIE.jnlp" --output "$IPMI_OUTPUT"
+            || curl --max-time 5 --silent --insecure --cookie Cookie=SID="$COOKIE" "https://$IPMI_HOST/cgi/Build_jnlp.cgi"
+               curl --max-time 5 --silent --insecure --cookie Cookie=SID="$COOKIE" "https://$IPMI_HOST/jnlp/sess_$COOKIE.jnlp" --output "$IPMI_OUTPUT"
    fi
         echo -e "COOKIE is $COOKIE\nIPMI_HOST is $IPMI_HOST\nIPMI_USER is $IPMI_USER\nIPMI_PASSWORD is $IPMI_PASSWORD\n"
         grep -e session_expired -e '404 - Not Found' "$IPMI_OUTPUT" && echo "ipmi_session is expired or 404" && rm -f "$IPMI_OUTPUT" && exit 1
