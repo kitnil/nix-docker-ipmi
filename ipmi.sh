@@ -28,8 +28,22 @@ help_main()
     echo "Usage: ipmi jenkins.ipmi.intr IPMI_PASSWORD"
 }
 
-[[ "$VNCDESKTOP" ]] \
-    || export _JAVA_OPTIONS='-Dsun.java2d.opengl=true -Ddeployment.security.level=MEDIUM -Djava.util.prefs.systemRoot=/tmp/.java -Djava.util.prefs.userRoot=/tmp/.java/.userPrefs -Ddeployment.system.config=/tmp/.java/deployment.properties -Ddeployment.system.config.mandatory=true'
+export JAVA_OPTIONS_LIST=(
+    "-Dsun.java2d.opengl=true"
+    "-Ddeployment.security.level=low"
+    "-Djava.util.prefs.systemRoot=/tmp/.java"
+    "-Djava.util.prefs.userRoot=/tmp/.java/.userPrefs"
+    "-Ddeployment.system.config=/tmp/.java/deployment.properties"
+    "-Ddeployment.system.config.mandatory=true"
+)
+
+if [[ -z $VNCDESKTOP ]]
+then
+    _JAVA_OPTIONS="${JAVA_OPTIONS_LIST[*]}"
+    export _JAVA_OPTIONS
+fi
+
+printf "JAVA_OPTIONS: %s\n" "$_JAVA_OPTIONS"
 
 [ $inside_container -eq 1 ] && unset _JAVA_OPTIONS
 
